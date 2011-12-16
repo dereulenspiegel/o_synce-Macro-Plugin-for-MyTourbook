@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: osynce Macro
+Bundle-SymbolicName: net.tourbook.device.osynce.macro;singleton:=true
+Bundle-Version: 1.0.0.a
+Bundle-Activator: net.tourbook.device.osynce.macro.Activator
+Require-Bundle: org.eclipse.core.runtime,
+ net.tourbook;bundle-version="11.8.2",
+ net.tourbook.device;bundle-version="11.8.2",
+ net.tourbook.rxtx_2.2;bundle-version="2.2.2"
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Vendor: MyTourbook
+Import-Package: net.tourbook.importdata,
+ org.eclipse.jface.operation
+Bundle-ClassPath: libs/macro.jar,
+ .
