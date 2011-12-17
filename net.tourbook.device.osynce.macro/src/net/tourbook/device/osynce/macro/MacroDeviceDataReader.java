@@ -106,6 +106,9 @@ public class MacroDeviceDataReader implements IRawDataReader {
 //			tourData.setDeviceWheel(t.getGraphElements());
 //			tourData.setDeviceTotalUp(t.getAltimeterGain());
 //			tourData.setDeviceTotalDown(t.getAltimeterLoss());
+			tourData.setAvgCadence(t.getAverageCadence());
+			tourData.setAvgPulse(t.getAverageHeartRate());
+			tourData.setCalories(t.getKCals());
 			//TODO set startYear
 
 			final ArrayList<TimeData> timeDataList = new ArrayList<TimeData>();
