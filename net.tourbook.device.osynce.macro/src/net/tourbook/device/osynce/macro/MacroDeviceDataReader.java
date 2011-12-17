@@ -73,14 +73,17 @@ public class MacroDeviceDataReader implements IRawDataReader {
 	}
 
 	@Override
-	public boolean processDeviceData(String filePath, DeviceData deviceData, HashMap<Long, TourData> tourDataMap) {
+	public boolean processDeviceData(	String filePath,
+										DeviceData deviceData,
+										HashMap<Long, TourData> newlyImportedTours,
+										HashMap<Long, TourData> alreadyImportedTours) {
 		if (trainings == null || trainings.isEmpty()) {
 			trainings = deserializeList(filePath);
 		}
 		if(deviceData != null){
 			System.out.println("DeviceData is NOT NULL!!!!");
 		}
-		if (tourDataMap != null) {
+		if (newlyImportedTours != null) {
 			System.out.println("TourDataMap is NOT NULL!!!");
 		}
 		SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
@@ -101,8 +104,8 @@ public class MacroDeviceDataReader implements IRawDataReader {
 			tourData.setTourImportFilePath(filePath);
 			//TODO Determine Wheel Size
 //			tourData.setDeviceWheel(t.getGraphElements());
-			tourData.setDeviceTotalUp(t.getAltimeterGain());
-			tourData.setDeviceTotalDown(t.getAltimeterLoss());
+//			tourData.setDeviceTotalUp(t.getAltimeterGain());
+//			tourData.setDeviceTotalDown(t.getAltimeterLoss());
 			//TODO set startYear
 
 			final ArrayList<TimeData> timeDataList = new ArrayList<TimeData>();
@@ -141,10 +144,12 @@ public class MacroDeviceDataReader implements IRawDataReader {
 				timeCounter++;
 			}
 
-			final Long tourId = tourData.createTourId(Integer.toString(Math.abs(tourData.getStartDistance())));
+			final Long tourId = tourData.createTourId(Integer.toString((int) (Math.abs(tourData.getStartDistance()))));
 
-			if (!tourDataMap.containsKey(tourId) && timeDataList.size() > 0) {
-				tourDataMap.put(tourId, tourData);
+			if (!alreadyImportedTours.containsKey(tourId)
+					&& newlyImportedTours.containsKey(tourId)
+					&& timeDataList.size() > 0) {
+				newlyImportedTours.put(tourId, tourData);
 				tourData.createTimeSeries(timeDataList, false);
 				tourData.setTourType(null);
 				tourData.computeTourDrivingTime();
@@ -161,8 +166,8 @@ public class MacroDeviceDataReader implements IRawDataReader {
 
 		}
 
-		if (tourDataMap == null) {
-			tourDataMap = new HashMap<Long, TourData>();
+		if (newlyImportedTours == null) {
+			newlyImportedTours = new HashMap<Long, TourData>();
 		}
 
 		return true;
