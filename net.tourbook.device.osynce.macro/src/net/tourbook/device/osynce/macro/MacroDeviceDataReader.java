@@ -14,16 +14,48 @@ import java.util.List;
 import net.tourbook.data.TimeData;
 import net.tourbook.data.TourData;
 import net.tourbook.importdata.DeviceData;
-import net.tourbook.importdata.IRawDataReader;
+import net.tourbook.importdata.SerialParameters;
+import net.tourbook.importdata.TourbookDevice;
 import de.akuz.osynce.macro.interfaces.GraphElement;
 import de.akuz.osynce.macro.interfaces.Training;
 
-public class MacroDeviceDataReader implements IRawDataReader {
+public class MacroDeviceDataReader extends TourbookDevice {
 
-	private final static String	DEVICE_ID		= "osynce_macro";
-	private final static String	VISIBLE_NAME	= "osynce Macro";
+	private final static String	DEVICE_ID		= "o_synce_macro";
+	private final static String	VISIBLE_NAME	= "o_synce Macro";
 
 	private List<Training>	trainings;
+
+	private final SimpleDateFormat	dateFormat		= new SimpleDateFormat("ddMMyyyy_HH_mm_ss");
+
+	public MacroDeviceDataReader() {
+		this.visibleName = VISIBLE_NAME;
+		this.fileExtension = MacroExternalDeviceReader.FILE_EXTENSION;
+	}
+
+	@Override
+	public String buildFileNameFromRawData(String rawDataFileName) {
+		if (trainings == null || trainings.size() == 0) {
+			trainings = deserializeList(rawDataFileName);
+		}
+		if (trainings.size() > 0) {
+			StringBuilder builder = new StringBuilder();
+			builder.append(dateFormat.format(trainings.get(0).getStartDate()));
+			builder.append("_");
+			builder.append(dateFormat.format(trainings.get(trainings.size() - 1).getStartDate()));
+			builder.append(".");
+			builder.append(MacroExternalDeviceReader.FILE_EXTENSION);
+			return builder.toString();
+		}
+
+		return null;
+	}
+
+	@Override
+	public boolean checkStartSequence(int byteIndex, int newByte) {
+		//  We can't check the start Sequence so we return always true
+		return true;
+	}
 
 	@SuppressWarnings("unchecked")
 	private List<Training> deserializeList(String filePath){
@@ -67,9 +99,20 @@ public class MacroDeviceDataReader implements IRawDataReader {
 	}
 
 	@Override
+	public SerialParameters getPortParameters(String portName) {
+		// Parameters are hardcoded in Macro lib
+		return null;
+	}
+
+	@Override
+	public int getStartSequenceSize() {
+		return 0;
+	}
+
+	@Override
 	public int getTransferDataSize() {
 		// TODO Check if we need this, but we can't know this size ind advance for this type of device
-		return 0;
+		return -1;
 	}
 
 	@Override
@@ -80,7 +123,7 @@ public class MacroDeviceDataReader implements IRawDataReader {
 		if (trainings == null || trainings.isEmpty()) {
 			trainings = deserializeList(filePath);
 		}
-		if(deviceData != null){
+		if (deviceData != null) {
 			System.out.println("DeviceData is NOT NULL!!!!");
 		}
 		if (newlyImportedTours != null) {
@@ -112,7 +155,7 @@ public class MacroDeviceDataReader implements IRawDataReader {
 			//TODO set startYear
 
 			final ArrayList<TimeData> timeDataList = new ArrayList<TimeData>();
-			
+
 			long timeCounter = 1;
 			GraphElement previousGraphElement = null;
 
@@ -167,10 +210,6 @@ public class MacroDeviceDataReader implements IRawDataReader {
 				tourData.setWeek(tourData.getStartYear(), tourData.getStartMonth(), tourData.getStartDay());
 			}
 
-		}
-
-		if (newlyImportedTours == null) {
-			newlyImportedTours = new HashMap<Long, TourData>();
 		}
 
 		return true;

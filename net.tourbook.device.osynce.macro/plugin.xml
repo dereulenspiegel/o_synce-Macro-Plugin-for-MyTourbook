@@ -2,21 +2,22 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
+         point="net.tourbook.deviceDataReader">
+      <device
+            class="net.tourbook.device.osynce.macro.MacroDeviceDataReader"
+            extensionSortPriority="99"
+            fileextension="mac"
+            id="net.tourbook.device.osynce.macro.MacroDeviceDataReader"
+            name="o_synce Macro">
+      </device>
+   </extension>
+   <extension
          point="net.tourbook.externalDeviceDataReader">
       <device
             class="net.tourbook.device.osynce.macro.MacroExternalDeviceReader"
             id="net.tourbook.device.osynce.macro.MacroExternalDeviceReader"
-            name="osynce Macro"
+            name="o_synce Macro"
             type="serial">
-      </device>
-   </extension>
-   <extension
-         point="net.tourbook.deviceDataReader">
-      <device
-            class="net.tourbook.device.osynce.macro.MacroDeviceDataReader"
-            fileextension="macro"
-            id="net.tourbook.device.osynce.macro.MacroDeviceDataReader"
-            name="osynce Macro">
       </device>
    </extension>
 

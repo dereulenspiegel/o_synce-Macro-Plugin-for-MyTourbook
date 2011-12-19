@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +13,6 @@ import java.util.Map;
 import net.tourbook.Messages;
 import net.tourbook.importdata.ExternalDevice;
 import net.tourbook.importdata.RawDataManager;
-import net.tourbook.importdata.SerialParameters;
-import net.tourbook.importdata.TourbookDevice;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -27,17 +26,19 @@ import de.akuz.osynce.macro.interfaces.Training;
 
 public class MacroExternalDeviceReader extends ExternalDevice {
 
-	public final static String	FILE_EXTENSION	= "macro";
+	public final static String	FILE_EXTENSION	= "mac";
 	
 	private List<File>			_receivedFiles;
 
 	private boolean				isCancelImport	= false;
 
-	private TourbookDevice		tourbookDevice;
-
 	public final static int		WORK_TO_DO		= 1;
 
 	private List<Training>		trainings;
+
+	private Macro				macro;
+
+	private int					trainingsCount;
 
 	public void cancelImport() {
 		isCancelImport = true;
@@ -51,21 +52,32 @@ public class MacroExternalDeviceReader extends ExternalDevice {
 			@Override
 			public void run(final IProgressMonitor monitor) {
 
-				final SerialParameters portParameters = tourbookDevice.getPortParameters(portName);
+//				final SerialParameters portParameters = tourbookDevice.getPortParameters(portName);
 
-				if (portParameters == null) {
-					return;
-				}
+//				if (portParameters == null) {
+//					return;
+//				}
 
 				final String msg = NLS.bind(Messages.Import_Wizard_Monitor_task_msg, new Object[] {
 						visibleName,
 						portName,
-						portParameters.getBaudRate() });
+						9600 });
 
-				monitor.beginTask(msg, WORK_TO_DO);
+				macro = new MacroRXTXDevice();
+				Map<String, String> properties = new HashMap<String, String>();
+				properties.put(AbstractMacroSerialPortDevice.PROPERTY_PORTNAME, portName);
+				macro.init(properties);
 
-				readDeviceData(monitor, portName);
-				saveReceivedData();
+
+				try {
+					trainingsCount = macro.getTrainingsStartDates().size();
+					monitor.beginTask(msg, trainingsCount);
+					readDeviceData(monitor, portName);
+					saveReceivedData();
+				} catch (CommunicationException e) {
+					e.printStackTrace();
+				}
+
 			}
 
 		};
@@ -77,18 +89,22 @@ public class MacroExternalDeviceReader extends ExternalDevice {
 	}
 
 	private void readDeviceData(final IProgressMonitor monitor, final String portName) {
-		Macro macro = new MacroRXTXDevice();
 		Map<String, String> properties = new HashMap<String, String>();
 		properties.put(AbstractMacroSerialPortDevice.PROPERTY_PORTNAME, portName);
-		macro.init(properties);
+//		macro.init(properties);
+		trainings = new ArrayList<Training>(trainingsCount);
 		if (!isCancelImport) {
 			try {
-				trainings = macro.getTrainings();
+				for (int i = 0; i < trainingsCount; i++) {
+//					macro.init(properties);
+					trainings.add(macro.getTraining(i));
+					monitor.worked(1);
+				}
 			} catch (CommunicationException e) {
 				e.printStackTrace();
 
 			} finally {
-				monitor.worked(WORK_TO_DO);
+				//monitor.worked(WORK_TO_DO);
 			}
 		}
 	}
