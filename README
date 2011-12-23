@@ -4,8 +4,13 @@ available, and the device won't be erased after transfer. To use this plugin you
 https://github.com/dereulenspiegel/O-Synce-Macro-Java-Interface
 This is also an osgi bundle (or plugin) for MyTourbook.
 
+Note that you need the latest beta version of MyTourbook to use this Plugin
+
 === ToDo ===
 * Create a configuration page, so the user can device if he wants to erase the device after transfer
 * Most tour imports seem to be working but some have unrealistic data.
 * Create unit tests to make sure further development doesn't break anything
 * Automate the build.
+
+And special thanks to o_synce who provided a free Macro unit and documentation so I can develop and test this
+software. Very great community support!
