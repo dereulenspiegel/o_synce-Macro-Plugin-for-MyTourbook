@@ -33,13 +33,13 @@ public class MacroExternalDeviceReader extends ExternalDevice {
 
 	private boolean				isCancelImport	= false;
 
-	public final static int		WORK_TO_DO		= 1;
-
 	private List<Training>		trainings;
 
 	private Macro				macro;
 
 	private int					trainingsCount;
+
+	private Map<String, String>		macroProperties;
 
 	private final IPreferenceStore	prefStore		= Activator.getDefault().getPreferenceStore();
 
@@ -55,21 +55,15 @@ public class MacroExternalDeviceReader extends ExternalDevice {
 			@Override
 			public void run(final IProgressMonitor monitor) {
 
-//				final SerialParameters portParameters = tourbookDevice.getPortParameters(portName);
-
-//				if (portParameters == null) {
-//					return;
-//				}
-
 				final String msg = NLS.bind(Messages.Import_Wizard_Monitor_task_msg, new Object[] {
 						visibleName,
 						portName,
 						9600 });
 
 				macro = new MacroRXTXDevice();
-				Map<String, String> properties = new HashMap<String, String>();
-				properties.put(AbstractMacroSerialPortDevice.PROPERTY_PORTNAME, portName);
-				macro.init(properties);
+				macroProperties = new HashMap<String, String>();
+				macroProperties.put(AbstractMacroSerialPortDevice.PROPERTY_PORTNAME, portName);
+				macro.init(macroProperties);
 
 
 				try {
@@ -92,9 +86,6 @@ public class MacroExternalDeviceReader extends ExternalDevice {
 	}
 
 	private void readDeviceData(final IProgressMonitor monitor, final String portName) {
-		Map<String, String> properties = new HashMap<String, String>();
-		properties.put(AbstractMacroSerialPortDevice.PROPERTY_PORTNAME, portName);
-//		macro.init(properties);
 		trainings = new ArrayList<Training>(trainingsCount);
 		if (!isCancelImport) {
 			try {
