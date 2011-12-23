@@ -25,6 +25,13 @@ import de.akuz.osynce.macro.MacroRXTXDevice;
 import de.akuz.osynce.macro.interfaces.Macro;
 import de.akuz.osynce.macro.interfaces.Training;
 
+/**
+ * This class handles the communication with the macro. Essentially an existing library is used.
+ * Also all data will be parsed and interpreted by this class and then serialized to disk to be read
+ * by the device data reader class
+ * 
+ * @author Till Klocke
+ */
 public class MacroExternalDeviceReader extends ExternalDevice {
 
 	public final static String	FILE_EXTENSION	= "mac";
@@ -85,6 +92,13 @@ public class MacroExternalDeviceReader extends ExternalDevice {
 		return isCancelImport;
 	}
 
+	/**
+	 * Here we read the data from the device. We are each stored training seperately, so we are able
+	 * to cancel the transfer and can show the user meaningful progress.
+	 * 
+	 * @param monitor
+	 * @param portName
+	 */
 	private void readDeviceData(final IProgressMonitor monitor, final String portName) {
 		trainings = new ArrayList<Training>(trainingsCount);
 		if (!isCancelImport) {
@@ -107,6 +121,9 @@ public class MacroExternalDeviceReader extends ExternalDevice {
 		}
 	}
 
+	/**
+	 * This method serializes the read data to disk to be processed later
+	 */
 	private void saveReceivedData() {
 		try {
 

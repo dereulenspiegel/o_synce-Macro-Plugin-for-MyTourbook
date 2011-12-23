@@ -19,6 +19,12 @@ import net.tourbook.importdata.TourbookDevice;
 import de.akuz.osynce.macro.interfaces.GraphElement;
 import de.akuz.osynce.macro.interfaces.Training;
 
+/**
+ * This class is responsible for mapping the Macro specific data types to the data types of
+ * MyTourbook. A Training will be mapped to TourData and a GraphElement will be mapped to TimeData
+ * 
+ * @author Till Klocke
+ */
 public class MacroDeviceDataReader extends TourbookDevice {
 
 	private final static String	DEVICE_ID		= "o_synce_macro";
@@ -51,6 +57,14 @@ public class MacroDeviceDataReader extends TourbookDevice {
 		return null;
 	}
 
+	/**
+	 * Since the macro doesn't give us distance data for each time slice we calculate this
+	 * information from speed and time of each time slice
+	 * 
+	 * @param g
+	 *            GraphElement representing a time slice
+	 * @return distance in meters
+	 */
 	private float calculateDistance(GraphElement g){
 		int time = g.getDataRate();
 		float speed = g.getSpeed();
@@ -63,6 +77,13 @@ public class MacroDeviceDataReader extends TourbookDevice {
 		return true;
 	}
 
+	/**
+	 * This method deserializes the data we got from the external device reader
+	 * 
+	 * @param filePath
+	 *            The path to the serialized data
+	 * @return a List of Training objects
+	 */
 	@SuppressWarnings("unchecked")
 	private List<Training> deserializeList(String filePath){
 		ObjectInputStream ois = null;
@@ -117,7 +138,7 @@ public class MacroDeviceDataReader extends TourbookDevice {
 
 	@Override
 	public int getTransferDataSize() {
-		// TODO Check if we need this, but we can't know this size ind advance for this type of device
+		// TODO Check if we need this, but we can't know this size in advance for this type of device
 		return -1;
 	}
 
@@ -173,6 +194,11 @@ public class MacroDeviceDataReader extends TourbookDevice {
 			int timeCounter = 1;
 			GraphElement previousGraphElement = null;
 
+			/*
+			 * The macro doesn't give us any hint if a sensor isn't present or is just giving us
+			 * null values (for example the cadence sensor on a downhill trail). So we assume that a
+			 * sensor isn't present at all if we always get 0 values.
+			 */
 			boolean isPulsePresent = false;
 			boolean isPowerPresent = false;
 			boolean isCadencePresent = false;
