@@ -98,12 +98,12 @@ public class MacroExternalDeviceReader extends ExternalDevice {
 		trainings = new ArrayList<Training>(trainingsCount);
 		if (!isCancelImport) {
 			try {
-				for (int i = 0; i < trainingsCount; i++) {
-//					macro.init(properties);
+				int i = 0;
+				while (i < trainingsCount && !isCancelImport) {
 					trainings.add(macro.getTraining(i));
 					monitor.worked(1);
+					i++;
 				}
-
 				if (prefStore.getBoolean(IPreferences.ERASE_DEVICE_AFTER_IMPORT)) {
 					macro.erase();
 				}
