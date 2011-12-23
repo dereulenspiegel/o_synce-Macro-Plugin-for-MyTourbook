@@ -16,6 +16,7 @@ import net.tourbook.importdata.RawDataManager;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.osgi.util.NLS;
 
 import de.akuz.osynce.macro.AbstractMacroSerialPortDevice;
@@ -39,6 +40,8 @@ public class MacroExternalDeviceReader extends ExternalDevice {
 	private Macro				macro;
 
 	private int					trainingsCount;
+
+	private final IPreferenceStore	prefStore		= Activator.getDefault().getPreferenceStore();
 
 	public void cancelImport() {
 		isCancelImport = true;
@@ -99,6 +102,10 @@ public class MacroExternalDeviceReader extends ExternalDevice {
 //					macro.init(properties);
 					trainings.add(macro.getTraining(i));
 					monitor.worked(1);
+				}
+
+				if (prefStore.getBoolean(IPreferences.ERASE_DEVICE_AFTER_IMPORT)) {
+					macro.erase();
 				}
 			} catch (CommunicationException e) {
 				e.printStackTrace();

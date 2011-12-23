@@ -20,5 +20,21 @@
             type="serial">
       </device>
    </extension>
+  
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="net.tourbook.preferences.PrefPageDataImport"
+            class="net.tourbook.device.osynce.macro.PreferencePage"
+            id="net.tourbook.device.osynce.macro.prefPage"
+            name="Macro">
+      </page>
+  </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="net.tourbook.device.osynce.macro.PreferenceInitialzer">
+      </initializer>
+   </extension>
 
 </plugin>
