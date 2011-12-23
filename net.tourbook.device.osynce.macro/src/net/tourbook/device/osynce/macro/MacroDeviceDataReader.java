@@ -54,7 +54,7 @@ public class MacroDeviceDataReader extends TourbookDevice {
 	private float calculateDistance(GraphElement g){
 		int time = g.getDataRate();
 		float speed = g.getSpeed();
-		return time * (speed * 0.36f);
+		return time * (speed / 3.6f);
 	}
 
 	@Override
