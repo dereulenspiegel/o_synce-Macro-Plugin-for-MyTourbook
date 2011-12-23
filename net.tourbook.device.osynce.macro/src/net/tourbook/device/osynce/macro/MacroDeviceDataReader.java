@@ -173,13 +173,23 @@ public class MacroDeviceDataReader extends TourbookDevice {
 			int timeCounter = 1;
 			GraphElement previousGraphElement = null;
 
+			boolean isPulsePresent = false;
+			boolean isPowerPresent = false;
+			boolean isCadencePresent = false;
+
 			for (GraphElement g : t.getAllGraphElements()) {
 				TimeData timeData = new TimeData();
 				timeData.time = g.getDataRate();
 				timeData.relativeTime = (timeCounter * g.getDataRate());
 				timeData.temperature = g.getTemperature();
 				timeData.cadence = g.getCadence();
+				if (g.getCadence() > 0) {
+					isCadencePresent = true;
+				}
 				timeData.pulse = g.getHeartRate();
+				if (g.getHeartRate() > 0) {
+					isPulsePresent = true;
+				}
 				timeData.distance = calculateDistance(g);
 
 				if (previousGraphElement == null) {
@@ -199,6 +209,9 @@ public class MacroDeviceDataReader extends TourbookDevice {
 
 
 				timeData.power = g.getPower();
+				if (g.getPower() > 0) {
+					isPowerPresent = true;
+				}
 				timeData.speed = g.getSpeed();
 
 				timeDataList.add(timeData);
@@ -212,10 +225,23 @@ public class MacroDeviceDataReader extends TourbookDevice {
 
 			if (!alreadyImportedTours.containsKey(tourId)
 					&& timeDataList.size() > 0) {
+				if (!isPowerPresent || !isCadencePresent || !isPulsePresent) {
+					for (TimeData d : timeDataList) {
+						if (!isPowerPresent) {
+							d.power = Float.MIN_VALUE;
+						}
+						if (!isCadencePresent) {
+							d.cadence = Float.MIN_VALUE;
+						}
+						if (!isPulsePresent) {
+							d.pulse = Float.MIN_VALUE;
+						}
+					}
+				}
 				newlyImportedTours.put(tourId, tourData);
 				tourData.createTimeSeries(timeDataList, false);
 				tourData.setTourType(null);
-				tourData.computeTourDrivingTime();
+//				tourData.computeTourDrivingTime();
 				tourData.computeComputedValues();
 				tourData.setDeviceId(DEVICE_ID);
 				tourData.setDeviceName(VISIBLE_NAME);
