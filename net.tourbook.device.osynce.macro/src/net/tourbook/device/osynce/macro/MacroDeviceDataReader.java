@@ -51,6 +51,12 @@ public class MacroDeviceDataReader extends TourbookDevice {
 		return null;
 	}
 
+	private float calculateDistance(GraphElement g){
+		int time = g.getDataRate();
+		float speed = g.getSpeed();
+		return time * (speed * 0.36f);
+	}
+
 	@Override
 	public boolean checkStartSequence(int byteIndex, int newByte) {
 		//  We can't check the start Sequence so we return always true
@@ -123,18 +129,16 @@ public class MacroDeviceDataReader extends TourbookDevice {
 		if (trainings == null || trainings.isEmpty()) {
 			trainings = deserializeList(filePath);
 		}
-		if (deviceData != null) {
-			System.out.println("DeviceData is NOT NULL!!!!");
-		}
-		if (newlyImportedTours != null) {
-			System.out.println("TourDataMap is NOT NULL!!!");
-		}
+
 		SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
 		SimpleDateFormat monthFormat = new SimpleDateFormat("MM");
 		SimpleDateFormat dayFormat = new SimpleDateFormat("dd");
+		SimpleDateFormat hourFormat = new SimpleDateFormat("HH");
+		SimpleDateFormat minuteFormat = new SimpleDateFormat("mm");
+		SimpleDateFormat secondsFormat = new SimpleDateFormat("ss");
 		Date currentDate = new Date(System.currentTimeMillis());
 
-		deviceData = new DeviceData();
+//		deviceData = new DeviceData();
 		deviceData.importId = generateUniqueIdForImport();
 		deviceData.transferDay = Short.parseShort(dayFormat.format(currentDate));
 		deviceData.transferMonth = Short.parseShort(monthFormat.format(currentDate));
@@ -143,7 +147,6 @@ public class MacroDeviceDataReader extends TourbookDevice {
 		for (Training t : trainings) {
 			TourData tourData = new TourData();
 			tourData.setDeviceTimeInterval((short) t.getGraphElements().get(0).getDataRate());
-			tourData.importRawDataFile = filePath;
 			tourData.setTourImportFilePath(filePath);
 			//TODO Determine Wheel Size
 //			tourData.setDeviceWheel(t.getGraphElements());
@@ -152,36 +155,51 @@ public class MacroDeviceDataReader extends TourbookDevice {
 			tourData.setAvgCadence(t.getAverageCadence());
 			tourData.setAvgPulse(t.getAverageHeartRate());
 			tourData.setCalories(t.getKCals());
-			//TODO set startYear
+			tourData.setDeviceAvgSpeed(t.getAverageSpeed());
+			tourData.setIsDistanceFromSensor(true);
+			tourData.setTourDistance(t.getTripDistance() / 1000);
+			//FIXME At the moment we don't differentiate between pre moving time and total training time
+			tourData.setTourDrivingTime(t.getTrainingDuration());
+			tourData.setTourRecordingTime(t.getTrainingDuration());
+			tourData.setStartDay(Short.parseShort(dayFormat.format(t.getStartDate())));
+			tourData.setStartMonth(Short.parseShort(monthFormat.format(t.getStartDate())));
+			tourData.setStartYear(Short.parseShort(yearFormat.format(t.getStartDate())));
+			tourData.setStartHour(Short.parseShort(hourFormat.format(t.getStartDate())));
+			tourData.setStartMinute(Short.parseShort(minuteFormat.format(t.getStartDate())));
+			tourData.setStartSecond(Short.parseShort(secondsFormat.format(t.getStartDate())));
 
 			final ArrayList<TimeData> timeDataList = new ArrayList<TimeData>();
 
-			long timeCounter = 1;
+			int timeCounter = 1;
 			GraphElement previousGraphElement = null;
 
 			for (GraphElement g : t.getAllGraphElements()) {
 				TimeData timeData = new TimeData();
-				timeData.absoluteAltitude = g.getAltitude();
-				timeData.absoluteDistance = t.getTripDistance();
-				timeData.absoluteTime = g.getDataRate() * timeCounter;
-				timeData.absoluteTime = t.getStartDate().getTime() + g.getDataRate() * timeCounter;
-				if (previousGraphElement != null) {
-					timeData.altitude = previousGraphElement.getAltitude() - g.getAltitude();
-				} else {
-					timeData.altitude = g.getAltitude();
-				}
-				timeData.cadence = g.getCadence();
-				//TODO calculate Distance
-				timeData.distance = Integer.MIN_VALUE;
-				timeData.gpxDistance = Float.MIN_VALUE;
-				timeData.latitude = Double.MIN_VALUE;
-				timeData.longitude = Double.MIN_VALUE;
-				timeData.power = g.getPower();
-				timeData.pulse = g.getHeartRate();
-				timeData.relativeTime = (int) (g.getDataRate() * timeCounter);
-				timeData.speed = (int) (g.getSpeed() * 10);
-				timeData.temperature = (int) (g.getTemperature());
 				timeData.time = g.getDataRate();
+				timeData.relativeTime = (timeCounter * g.getDataRate());
+				timeData.temperature = g.getTemperature();
+				timeData.cadence = g.getCadence();
+				timeData.pulse = g.getHeartRate();
+				timeData.distance = calculateDistance(g);
+
+				if (previousGraphElement == null) {
+					timeData.altitude = g.getAltitude();
+					timeData.absoluteDistance = timeData.distance;
+				} else {
+					timeData.altitude = previousGraphElement.getAltitude() - g.getAltitude();
+					timeData.absoluteDistance = timeDataList.get(timeDataList.size() - 1).absoluteDistance
+							+ timeData.distance;
+				}
+
+				timeData.absoluteAltitude = g.getAltitude();
+
+//				timeData.absoluteDistance TODO Calculate distance
+//				also calculate relative distance timeData.distance
+
+
+
+				timeData.power = g.getPower();
+				timeData.speed = g.getSpeed();
 
 				timeDataList.add(timeData);
 
@@ -193,7 +211,6 @@ public class MacroDeviceDataReader extends TourbookDevice {
 			final Long tourId = tourData.createTourId(Integer.toString((int) (Math.abs(tourData.getStartDistance()))));
 
 			if (!alreadyImportedTours.containsKey(tourId)
-					&& newlyImportedTours.containsKey(tourId)
 					&& timeDataList.size() > 0) {
 				newlyImportedTours.put(tourId, tourData);
 				tourData.createTimeSeries(timeDataList, false);
@@ -203,10 +220,10 @@ public class MacroDeviceDataReader extends TourbookDevice {
 				tourData.setDeviceId(DEVICE_ID);
 				tourData.setDeviceName(VISIBLE_NAME);
 				//FIXME We could run into problems here since we aren't setting modenames
-				final Short profileId = Short.valueOf(tourData.getDeviceTourType(), 16);
+//				final Short profileId = Short.valueOf(tourData.getDeviceTourType(), 16);
 
-				tourData.setDeviceMode(profileId);
-				tourData.setDeviceModeName(getDeviceModeName(profileId));
+//				tourData.setDeviceMode(profileId);
+//				tourData.setDeviceModeName(getDeviceModeName(profileId));
 				tourData.setWeek(tourData.getStartYear(), tourData.getStartMonth(), tourData.getStartDay());
 			}
 
