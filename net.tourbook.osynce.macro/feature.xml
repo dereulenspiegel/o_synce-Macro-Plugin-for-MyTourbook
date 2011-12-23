@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="net.tourbook.osynce.macro"
+      label="o_synce Macro"
+      version="1.0.0.qualifier"
+      os="linux,macosx,win32"
+      ws="carbon,cocoa,gtk,motif,photon,win32,wpf"
+      nl="de,en"
+      arch="x86,x86_64">
+
+   <description url="http://www.example.com/description">
+      This feature adds support for the Macro cyclometer from o_synce. At the moment the only feature is to import data from the device. But more will come soon.
+   </description>
+
+   <copyright url="http://www.example.com/copyright">
+      [Enter Copyright Description here.]
+   </copyright>
+
+   <license url="http://www.example.com/license">
+      [Enter License Description here.]
+   </license>
+
+   <requires>
+      <import plugin="net.tourbook.rxtx_2.2" version="2.2.2" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="net.tourbook" version="11.8.2" match="greaterOrEqual"/>
+      <import plugin="net.tourbook.device" version="11.8.2" match="greaterOrEqual"/>
+      <import plugin="de.akuz.osynce.macro" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui" version="3.7.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jface"/>
+   </requires>
+
+   <plugin
+         id="de.akuz.osynce.macro"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="net.tourbook.device.osynce.macro"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
