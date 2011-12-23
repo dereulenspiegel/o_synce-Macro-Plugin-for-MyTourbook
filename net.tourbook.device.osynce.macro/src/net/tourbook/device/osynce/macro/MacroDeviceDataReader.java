@@ -150,15 +150,15 @@ public class MacroDeviceDataReader extends TourbookDevice {
 			tourData.setTourImportFilePath(filePath);
 			//TODO Determine Wheel Size
 //			tourData.setDeviceWheel(t.getGraphElements());
-//			tourData.setDeviceTotalUp(t.getAltimeterGain());
-//			tourData.setDeviceTotalDown(t.getAltimeterLoss());
+			tourData.setTourAltDown(t.getAltimeterLoss());
+			tourData.setTourAltUp(t.getAltimeterGain());
 			tourData.setAvgCadence(t.getAverageCadence());
 			tourData.setAvgPulse(t.getAverageHeartRate());
 			tourData.setCalories(t.getKCals());
 			tourData.setDeviceAvgSpeed(t.getAverageSpeed());
 			tourData.setIsDistanceFromSensor(true);
 			tourData.setTourDistance(t.getTripDistance() / 1000);
-			//FIXME At the moment we don't differentiate between pre moving time and total training time
+			//FIXME At the moment we don't differentiate between pure moving time and total training time
 			tourData.setTourDrivingTime(t.getTrainingDuration());
 			tourData.setTourRecordingTime(t.getTrainingDuration());
 			tourData.setStartDay(Short.parseShort(dayFormat.format(t.getStartDate())));
