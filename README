@@ -1,0 +1,11 @@
+This is a plugin for MyTourbook (http://mytourbook.sourceforge.net/mytourbook/) to import your data from a Macro cycle computer
+from o_synce (http://www.o-synce.com/). This plugin is considered experimental, but basics should work. At the moment there is configuratio
+available, and the device won't be erased after transfer. To use this plugin you will also need the following library:
+https://github.com/dereulenspiegel/O-Synce-Macro-Java-Interface
+This is also an osgi bundle (or plugin) for MyTourbook.
+
+=== ToDo ===
+* Create a configuration page, so the user can device if he wants to erase the device after transfer
+* Most tour imports seem to be working but some have unrealistic data.
+* Create unit tests to make sure further development doesn't break anything
+* Automate the build.
