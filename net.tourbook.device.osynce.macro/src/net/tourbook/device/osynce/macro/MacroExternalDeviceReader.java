@@ -15,9 +15,11 @@ import net.tourbook.importdata.ExternalDevice;
 import net.tourbook.importdata.RawDataManager;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Display;
 
 import de.akuz.osynce.macro.AbstractMacroSerialPortDevice;
 import de.akuz.osynce.macro.CommunicationException;
@@ -72,14 +74,21 @@ public class MacroExternalDeviceReader extends ExternalDevice {
 				macroProperties.put(AbstractMacroSerialPortDevice.PROPERTY_PORTNAME, portName);
 				macro.init(macroProperties);
 
-
 				try {
 					trainingsCount = macro.getTrainingsStartDates().size();
 					monitor.beginTask(msg, trainingsCount);
 					readDeviceData(monitor, portName);
 					saveReceivedData();
 				} catch (CommunicationException e) {
-					e.printStackTrace();
+					Display.getDefault().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							MessageDialog.openError(
+									Display.getCurrent().getActiveShell(),
+									"Error",
+									net.tourbook.device.osynce.macro.Messages.errorMessageReadingDevice);
+						}
+					});
 				}
 
 			}
@@ -99,24 +108,17 @@ public class MacroExternalDeviceReader extends ExternalDevice {
 	 * @param monitor
 	 * @param portName
 	 */
-	private void readDeviceData(final IProgressMonitor monitor, final String portName) {
+	private void readDeviceData(final IProgressMonitor monitor, final String portName) throws CommunicationException {
 		trainings = new ArrayList<Training>(trainingsCount);
 		if (!isCancelImport) {
-			try {
-				int i = 0;
-				while (i < trainingsCount && !isCancelImport) {
-					trainings.add(macro.getTraining(i));
-					monitor.worked(1);
-					i++;
-				}
-				if (prefStore.getBoolean(IPreferences.ERASE_DEVICE_AFTER_IMPORT)) {
-					macro.erase();
-				}
-			} catch (CommunicationException e) {
-				e.printStackTrace();
-
-			} finally {
-				//monitor.worked(WORK_TO_DO);
+			int i = 0;
+			while (i < trainingsCount && !isCancelImport) {
+				trainings.add(macro.getTraining(i));
+				monitor.worked(1);
+				i++;
+			}
+			if (prefStore.getBoolean(IPreferences.ERASE_DEVICE_AFTER_IMPORT)) {
+				macro.erase();
 			}
 		}
 	}
@@ -138,10 +140,27 @@ public class MacroExternalDeviceReader extends ExternalDevice {
 			_receivedFiles.add(tempFile);
 
 		} catch (final FileNotFoundException e) {
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					MessageDialog.openError(
+							Display.getCurrent().getActiveShell(),
+							"Error",
+							net.tourbook.device.osynce.macro.Messages.errorMessageTempFileNotFound);
+				}
+			});
 			e.printStackTrace();
 		} catch (final IOException e) {
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					MessageDialog.openError(
+							Display.getCurrent().getActiveShell(),
+							"Error",
+							net.tourbook.device.osynce.macro.Messages.errorMessageIOException);
+				}
+			});
 			e.printStackTrace();
 		}
 	}
-
 }

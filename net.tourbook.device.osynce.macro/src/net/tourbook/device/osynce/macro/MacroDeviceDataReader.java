@@ -16,6 +16,10 @@ import net.tourbook.data.TourData;
 import net.tourbook.importdata.DeviceData;
 import net.tourbook.importdata.SerialParameters;
 import net.tourbook.importdata.TourbookDevice;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
+
 import de.akuz.osynce.macro.interfaces.GraphElement;
 import de.akuz.osynce.macro.interfaces.Training;
 
@@ -94,10 +98,37 @@ public class MacroDeviceDataReader extends TourbookDevice {
 			List<Training> list = (List<Training>) in;
 			return list;
 		} catch (FileNotFoundException e) {
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					MessageDialog.openError(
+							Display.getCurrent().getActiveShell(),
+							"Error",
+							net.tourbook.device.osynce.macro.Messages.errorMessageTempFileNotFound);
+				}
+			});
 			e.printStackTrace();
 		} catch (IOException e) {
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					MessageDialog.openError(
+							Display.getCurrent().getActiveShell(),
+							"Error",
+							net.tourbook.device.osynce.macro.Messages.errorMessageIOException);
+				}
+			});
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					MessageDialog.openError(
+							Display.getCurrent().getActiveShell(),
+							"Error",
+							net.tourbook.device.osynce.macro.Messages.errorMessageFailedToReadRawData);
+				}
+			});
 			e.printStackTrace();
 		} finally {
 			try {

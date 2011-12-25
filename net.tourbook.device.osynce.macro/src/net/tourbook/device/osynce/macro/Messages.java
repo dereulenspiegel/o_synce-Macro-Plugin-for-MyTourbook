@@ -10,6 +10,14 @@ public class Messages extends NLS {
 
 	public static String		prefPageEditorEraseDevice;
 
+	public static String		errorMessageReadingDevice;
+
+	public static String		errorMessageTempFileNotFound;
+
+	public static String		errorMessageIOException;
+
+	public static String		errorMessageFailedToReadRawData;
+
 	private static final String	BUNDLE_NAME	= "net.tourbook.device.osynce.macro.messages";	//$NON-NLS-1$
 
 	static {
