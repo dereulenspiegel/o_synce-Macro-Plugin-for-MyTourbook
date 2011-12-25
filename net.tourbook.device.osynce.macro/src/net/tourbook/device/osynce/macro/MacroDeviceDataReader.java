@@ -196,29 +196,29 @@ public class MacroDeviceDataReader extends TourbookDevice {
 		deviceData.transferMonth = Short.parseShort(monthFormat.format(currentDate));
 		deviceData.transferYear = Short.parseShort(yearFormat.format(currentDate));
 
-		for (Training t : trainings) {
+		for (Training training : trainings) {
 			TourData tourData = new TourData();
-			tourData.setDeviceTimeInterval((short) t.getGraphElements().get(0).getDataRate());
+			tourData.setDeviceTimeInterval((short) training.getGraphElements().get(0).getDataRate());
 			tourData.setTourImportFilePath(filePath);
 			//TODO Determine Wheel Size
 //			tourData.setDeviceWheel(t.getGraphElements());
-			tourData.setTourAltDown(t.getAltimeterLoss());
-			tourData.setTourAltUp(t.getAltimeterGain());
-			tourData.setAvgCadence(t.getAverageCadence());
-			tourData.setAvgPulse(t.getAverageHeartRate());
-			tourData.setCalories(t.getKCals());
-			tourData.setDeviceAvgSpeed(t.getAverageSpeed());
+			tourData.setTourAltDown(training.getAltimeterLoss());
+			tourData.setTourAltUp(training.getAltimeterGain());
+			tourData.setAvgCadence(training.getAverageCadence());
+			tourData.setAvgPulse(training.getAverageHeartRate());
+			tourData.setCalories(training.getKCals());
+			tourData.setDeviceAvgSpeed(training.getAverageSpeed());
 			tourData.setIsDistanceFromSensor(true);
-			tourData.setTourDistance(t.getTripDistance() / 1000);
+			tourData.setTourDistance(training.getTripDistance() / 1000);
 			//FIXME At the moment we don't differentiate between pure moving time and total training time
-			tourData.setTourDrivingTime(t.getTrainingDuration());
-			tourData.setTourRecordingTime(t.getTrainingDuration());
-			tourData.setStartDay(Short.parseShort(dayFormat.format(t.getStartDate())));
-			tourData.setStartMonth(Short.parseShort(monthFormat.format(t.getStartDate())));
-			tourData.setStartYear(Short.parseShort(yearFormat.format(t.getStartDate())));
-			tourData.setStartHour(Short.parseShort(hourFormat.format(t.getStartDate())));
-			tourData.setStartMinute(Short.parseShort(minuteFormat.format(t.getStartDate())));
-			tourData.setStartSecond(Short.parseShort(secondsFormat.format(t.getStartDate())));
+			tourData.setTourDrivingTime(training.getTrainingDuration());
+			tourData.setTourRecordingTime(training.getTrainingDuration());
+			tourData.setStartDay(Short.parseShort(dayFormat.format(training.getStartDate())));
+			tourData.setStartMonth(Short.parseShort(monthFormat.format(training.getStartDate())));
+			tourData.setStartYear(Short.parseShort(yearFormat.format(training.getStartDate())));
+			tourData.setStartHour(Short.parseShort(hourFormat.format(training.getStartDate())));
+			tourData.setStartMinute(Short.parseShort(minuteFormat.format(training.getStartDate())));
+			tourData.setStartSecond(Short.parseShort(secondsFormat.format(training.getStartDate())));
 
 			final ArrayList<TimeData> timeDataList = new ArrayList<TimeData>();
 
@@ -234,46 +234,46 @@ public class MacroDeviceDataReader extends TourbookDevice {
 			boolean isPowerPresent = false;
 			boolean isCadencePresent = false;
 
-			for (GraphElement g : t.getAllGraphElements()) {
+			for (GraphElement graphElement : training.getAllGraphElements()) {
 				TimeData timeData = new TimeData();
-				timeData.time = g.getDataRate();
-				timeData.relativeTime = (timeCounter * g.getDataRate());
-				timeData.temperature = g.getTemperature();
-				timeData.cadence = g.getCadence();
-				if (g.getCadence() > 0) {
+				timeData.time = graphElement.getDataRate();
+				timeData.relativeTime = (timeCounter * graphElement.getDataRate());
+				timeData.temperature = graphElement.getTemperature();
+				timeData.cadence = graphElement.getCadence();
+				if (graphElement.getCadence() > 0) {
 					isCadencePresent = true;
 				}
-				timeData.pulse = g.getHeartRate();
-				if (g.getHeartRate() > 0) {
+				timeData.pulse = graphElement.getHeartRate();
+				if (graphElement.getHeartRate() > 0) {
 					isPulsePresent = true;
 				}
-				timeData.distance = calculateDistance(g);
+				timeData.distance = calculateDistance(graphElement);
 
 				if (previousGraphElement == null) {
-					timeData.altitude = g.getAltitude();
+					timeData.altitude = graphElement.getAltitude();
 					timeData.absoluteDistance = timeData.distance;
 				} else {
-					timeData.altitude = previousGraphElement.getAltitude() - g.getAltitude();
+					timeData.altitude = previousGraphElement.getAltitude() - graphElement.getAltitude();
 					timeData.absoluteDistance = timeDataList.get(timeDataList.size() - 1).absoluteDistance
 							+ timeData.distance;
 				}
 
-				timeData.absoluteAltitude = g.getAltitude();
+				timeData.absoluteAltitude = graphElement.getAltitude();
 
 //				timeData.absoluteDistance TODO Calculate distance
 //				also calculate relative distance timeData.distance
 
 
 
-				timeData.power = g.getPower();
-				if (g.getPower() > 0) {
+				timeData.power = graphElement.getPower();
+				if (graphElement.getPower() > 0) {
 					isPowerPresent = true;
 				}
-				timeData.speed = g.getSpeed();
+				timeData.speed = graphElement.getSpeed();
 
 				timeDataList.add(timeData);
 
-				previousGraphElement = g;
+				previousGraphElement = graphElement;
 
 				timeCounter++;
 			}
