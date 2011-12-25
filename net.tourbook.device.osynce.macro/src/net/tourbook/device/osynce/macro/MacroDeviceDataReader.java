@@ -220,7 +220,7 @@ public class MacroDeviceDataReader extends TourbookDevice {
 			tourData.setStartMinute(Short.parseShort(minuteFormat.format(training.getStartDate())));
 			tourData.setStartSecond(Short.parseShort(secondsFormat.format(training.getStartDate())));
 
-			final ArrayList<TimeData> timeDataList = new ArrayList<TimeData>();
+			final ArrayList<TimeData> timeDataList = new ArrayList<TimeData>(training.getAllGraphElements().size());
 
 			int timeCounter = 1;
 			GraphElement previousGraphElement = null;
