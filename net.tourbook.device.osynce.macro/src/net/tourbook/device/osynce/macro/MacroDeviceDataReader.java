@@ -260,11 +260,6 @@ public class MacroDeviceDataReader extends TourbookDevice {
 
 				timeData.absoluteAltitude = graphElement.getAltitude();
 
-//				timeData.absoluteDistance TODO Calculate distance
-//				also calculate relative distance timeData.distance
-
-
-
 				timeData.power = graphElement.getPower();
 				if (graphElement.getPower() > 0) {
 					isPowerPresent = true;
