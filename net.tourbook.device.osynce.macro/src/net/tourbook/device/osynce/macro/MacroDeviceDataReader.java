@@ -17,8 +17,8 @@ import net.tourbook.importdata.DeviceData;
 import net.tourbook.importdata.SerialParameters;
 import net.tourbook.importdata.TourbookDevice;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.statushandlers.StatusManager;
 
 import de.akuz.osynce.macro.interfaces.GraphElement;
 import de.akuz.osynce.macro.interfaces.Training;
@@ -89,7 +89,7 @@ public class MacroDeviceDataReader extends TourbookDevice {
 	 * @return a List of Training objects
 	 */
 	@SuppressWarnings("unchecked")
-	private List<Training> deserializeList(String filePath){
+	private List<Training> deserializeList(String filePath) {
 		ObjectInputStream ois = null;
 		try {
 			FileInputStream fis = new FileInputStream(new File(filePath));
@@ -98,38 +98,11 @@ public class MacroDeviceDataReader extends TourbookDevice {
 			List<Training> list = (List<Training>) in;
 			return list;
 		} catch (FileNotFoundException e) {
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					MessageDialog.openError(
-							Display.getCurrent().getActiveShell(),
-							"Error",
-							net.tourbook.device.osynce.macro.Messages.errorMessageTempFileNotFound);
-				}
-			});
-			e.printStackTrace();
+			log(e, Messages.errorMessageTempFileNotFound);
 		} catch (IOException e) {
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					MessageDialog.openError(
-							Display.getCurrent().getActiveShell(),
-							"Error",
-							net.tourbook.device.osynce.macro.Messages.errorMessageIOException);
-				}
-			});
-			e.printStackTrace();
+			log(e, Messages.errorMessageIOException);
 		} catch (ClassNotFoundException e) {
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					MessageDialog.openError(
-							Display.getCurrent().getActiveShell(),
-							"Error",
-							net.tourbook.device.osynce.macro.Messages.errorMessageFailedToReadRawData);
-				}
-			});
-			e.printStackTrace();
+			log(e, Messages.errorMessageFailedToReadRawData);
 		} finally {
 			try {
 				ois.close();
@@ -138,6 +111,13 @@ public class MacroDeviceDataReader extends TourbookDevice {
 			}
 		}
 		return null;
+	}
+
+	private void log(Exception e, String message) {
+		
+		StatusManager.getManager().handle(
+				new Status(Status.ERROR, Activator.PLUGIN_ID, message, e),
+				StatusManager.LOG);
 	}
 
 	private long generateUniqueIdForImport() {
